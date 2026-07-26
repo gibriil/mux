@@ -1,0 +1,2 @@
+# mux
+Go Enum Multiplexor
