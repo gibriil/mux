@@ -29,13 +29,18 @@ func (m *Mux) HandleFunc(route Route, handler func(r Routable) error) {
 }
 
 func (m *Mux) register(route Route, handler Handler) {
-	if _, ok := m.routes[route]; !ok {
+	if _, exists := m.routes[route]; exists {
 		panic("Route already has a registered Handler")
 	}
 	m.routes[route] = handler
 }
 
 func (m *Mux) Process(r Routable) error {
-	h := m.routes[r.Route()]
+	h, exists := m.routes[r.Route()]
+
+	if !exists {
+		return ErrNoHandler
+	}
+
 	return h.Process(r)
 }

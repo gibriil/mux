@@ -2,7 +2,12 @@ package mux
 
 import (
 	"context"
+	"errors"
 	"log"
+)
+
+var (
+	ErrNoHandler = errors.New("No handler registered for Route")
 )
 
 type Multiplexer struct {
@@ -35,7 +40,8 @@ func (m *Multiplexer) ProcessWithContext(ctx context.Context) error {
 
 		route, err := m.Source.Next(ctx)
 		if err != nil {
-			return err
+			m.logError(err)
+			continue
 		}
 
 		if err := m.Handler.Process(route); err != nil {
