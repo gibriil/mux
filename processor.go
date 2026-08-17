@@ -1,3 +1,7 @@
+// Copyright 2026 Peter James Beard. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package mux
 
 import (
@@ -10,7 +14,7 @@ var (
 	ErrNoHandler = errors.New("No handler registered for Route")
 )
 
-type Multiplexer struct {
+type Processor struct {
 	Source   Source
 	Handler  Handler
 	ErrorLog *log.Logger
@@ -22,26 +26,15 @@ func NewMux() *Mux {
 	}
 }
 
-type Source interface {
-	Next(context.Context) (Routable, error)
-}
-
-func (m *Multiplexer) Process() error {
+func (m *Processor) Process() error {
 	return m.ProcessWithContext(context.Background())
 }
 
-func (m *Multiplexer) ProcessWithContext(ctx context.Context) error {
+func (m *Processor) ProcessWithContext(ctx context.Context) error {
 	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
-
 		route, err := m.Source.Next(ctx)
 		if err != nil {
-			m.logError(err)
-			continue
+			return err
 		}
 
 		if err := m.Handler.Process(route); err != nil {
@@ -51,7 +44,7 @@ func (m *Multiplexer) ProcessWithContext(ctx context.Context) error {
 	}
 }
 
-func (m *Multiplexer) logError(err error) {
+func (m *Processor) logError(err error) {
 	if m.ErrorLog != nil {
 		m.ErrorLog.Println(err)
 	} else {

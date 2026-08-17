@@ -1,20 +1,8 @@
+// Copyright 2026 Peter James Beard. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package mux
-
-type Route string
-
-type Routable interface {
-	Route() Route
-}
-
-type Handler interface {
-	Process(Routable) error
-}
-
-type HandlerFunc func(Routable) error
-
-func (f HandlerFunc) Process(r Routable) error {
-	return f(r)
-}
 
 type Mux struct {
 	routes map[Route]Handler
@@ -24,7 +12,7 @@ func (m *Mux) Handle(route Route, handler Handler) {
 	m.register(route, handler)
 }
 
-func (m *Mux) HandleFunc(route Route, handler func(r Routable) error) {
+func (m *Mux) HandleFunc(route Route, handler func(Routable) error) {
 	m.register(route, HandlerFunc(handler))
 }
 
