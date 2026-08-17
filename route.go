@@ -4,8 +4,28 @@
 
 package mux
 
-type Route string
+const maxDepth = 3
+
+type Route interface{}
 
 type Routable interface {
 	Route() Route
+}
+
+func resolveRoute(r Route) Route {
+	route := r
+	if _, ok := route.(Routable); !ok {
+		return route
+	}
+
+	for depth := 0; depth < maxDepth; depth++ {
+		if next, ok := route.(Routable); ok {
+			route = next.Route()
+			continue
+		}
+
+		return route
+	}
+
+	return ErrNoRoute
 }

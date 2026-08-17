@@ -14,12 +14,12 @@ import (
 )
 
 type event struct {
-	Name string
-	msg  string
+	Name    string
+	Details map[string]any
 }
 
 func (e event) Route() mux.Route {
-	return mux.Route(e.Name)
+	return e.Name
 }
 
 type eventBus struct {
@@ -54,14 +54,16 @@ func TestMuxProcess(t *testing.T) {
 
 	e := event{
 		Name: "test",
-		msg:  "hello",
+		Details: map[string]any{
+			"msg": "hello",
+		},
 	}
 
 	if err := m.Process(e); err != nil {
 		t.Fatalf("Process() error = %v", err)
 	}
 
-	if received != e {
+	if received.(event).Name != e.Name {
 		t.Fatalf("handler received %v, want %v", received, e)
 	}
 }

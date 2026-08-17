@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	ErrNoHandler = errors.New("No handler registered for Route")
+	ErrNoHandler = errors.New("no handler registered for Route")
+	ErrNoRoute   = errors.New("no valid comparable Route")
 )
 
 type Processor struct {

@@ -4,6 +4,8 @@
 
 package mux
 
+import "errors"
+
 type Mux struct {
 	routes map[Route]Handler
 }
@@ -17,14 +19,22 @@ func (m *Mux) HandleFunc(route Route, handler func(Routable) error) {
 }
 
 func (m *Mux) register(route Route, handler Handler) {
-	if _, exists := m.routes[route]; exists {
-		panic("Route already has a registered Handler")
+	routeKey := resolveRoute(route)
+	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
+		panic(err)
+	}
+	if _, exists := m.routes[routeKey]; exists {
+		panic("route already has a registered Handler")
 	}
 	m.routes[route] = handler
 }
 
 func (m *Mux) Process(r Routable) error {
-	h, exists := m.routes[r.Route()]
+	routeKey := resolveRoute(Route(r))
+	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
+		return err
+	}
+	h, exists := m.routes[routeKey]
 
 	if !exists {
 		return ErrNoHandler
