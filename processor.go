@@ -15,12 +15,14 @@ var (
 	ErrNoRoute   = errors.New("no valid comparable Route")
 )
 
+// A Processor defines parameters for running a multiplexer process
 type Processor struct {
 	Source   Source
 	Handler  Handler
 	ErrorLog *log.Logger
 }
 
+// New
 func NewMux() *Mux {
 	return &Mux{
 		routes: map[Route]Handler{},

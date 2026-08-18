@@ -6,7 +6,6 @@ package mux_test
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"testing"
@@ -69,8 +68,7 @@ func TestProcessorContinuesAfterHandlerError(t *testing.T) {
 	handler := mux.HandlerFunc(func(r mux.Routable) error {
 		received = append(received, r)
 
-		fmt.Print(r.Route())
-		if r.Route() == "one" {
+		if r.Route() == "two" {
 			return errors.New("handler failed")
 		}
 

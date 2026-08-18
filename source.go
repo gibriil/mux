@@ -6,6 +6,8 @@ package mux
 
 import "context"
 
+// Source is the interface for supplying the Processor with input.
+// Next() is called to receive the Routable for matching Route() to a Handler
 type Source interface {
 	Next(context.Context) (Routable, error)
 }

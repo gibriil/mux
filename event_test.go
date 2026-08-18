@@ -96,3 +96,21 @@ func TestHandlerFunc(t *testing.T) {
 		t.Fatal("handler was not called")
 	}
 }
+
+func TestMuxHandleDuplicate(t *testing.T) {
+	m := mux.NewMux()
+
+	handler := mux.HandlerFunc(func(mux.Routable) error {
+		return nil
+	})
+
+	m.Handle("test", handler)
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected duplicate route registration to panic")
+		}
+	}()
+
+	m.Handle("test", handler)
+}
