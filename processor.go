@@ -22,17 +22,19 @@ type Processor struct {
 	ErrorLog *log.Logger
 }
 
-// New
+// NewMux creates a new Mux.
 func NewMux() *Mux {
 	return &Mux{
 		routes: map[Route]Handler{},
 	}
 }
 
+// Process reads from Source to begin handling routes
 func (m *Processor) Process() error {
 	return m.ProcessWithContext(context.Background())
 }
 
+// Process reads from Source to begin handling routes with a user defined context
 func (m *Processor) ProcessWithContext(ctx context.Context) error {
 	for {
 		route, err := m.Source.Next(ctx)

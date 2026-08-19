@@ -6,9 +6,10 @@ package mux
 
 const maxDepth = 3
 
-// Route is used for registering handlers.
+// Route is a value used to identify a registered route.
 //
-// Route must satisfy Routable or be comparable
+// A Route may be a Routable, in which case it is resolved recursively,
+// or it may be a terminal comparable value.
 type Route any
 
 // Routable is required for route resolution
@@ -20,19 +21,18 @@ type Routable interface {
 
 // resolveRoute loops through Routable's Route() until a comparable is found that does not satisfy Routable or until maxDepth is reached.
 func resolveRoute(r Route) Route {
-	route := r
-	if _, ok := route.(Routable); !ok {
-		return route
-	}
-
 	for depth := 0; depth < maxDepth; depth++ {
-		if next, ok := route.(Routable); ok {
-			route = next.Route()
-			continue
+		next, ok := r.(Routable)
+		if !ok {
+			return r
 		}
 
-		return route
+		r = next.Route()
 	}
 
-	return ErrNoRoute
+	if _, ok := r.(Routable); ok {
+		return ErrNoRoute
+	}
+
+	return r
 }

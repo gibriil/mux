@@ -4,7 +4,7 @@
 
 package mux
 
-// A Handler responds to an Routable.
+// A Handler responds to a Routable.
 type Handler interface {
 	Process(Routable) error
 }
