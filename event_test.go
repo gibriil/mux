@@ -10,7 +10,7 @@ import (
 	"io"
 	"testing"
 
-	"gibriil.com/gibriil/mux"
+	"github.com/gibriil/mux"
 )
 
 type event struct {

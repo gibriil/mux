@@ -1,3 +1,3 @@
-module gibriil.com/gibriil/mux
+module github.com/gibriil/mux
 
 go 1.24.1

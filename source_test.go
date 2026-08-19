@@ -11,7 +11,7 @@ import (
 	"log"
 	"testing"
 
-	"gibriil.com/gibriil/mux"
+	"github.com/gibriil/mux"
 )
 
 type blockingSource struct{}
