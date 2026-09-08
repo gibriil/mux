@@ -27,7 +27,7 @@ func TestProcessorContextCancellation(t *testing.T) {
 
 	p := &mux.Processor{
 		Source:   blockingSource{},
-		Handler:  mux.HandlerFunc(func(mux.Routable, mux.Handler) error { return nil }),
+		Handler:  mux.HandlerFunc(func(context.Context, mux.Routable, mux.Handler) error { return nil }),
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
 

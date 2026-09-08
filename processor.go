@@ -36,12 +36,7 @@ func (m *Processor) ProcessWithContext(ctx context.Context) error {
 			return err
 		}
 
-		payload := routableWithContext{
-			Routable: route,
-			ctx:      ctx,
-		}
-
-		if err := m.Handler.Process(payload, m.Emitter); err != nil {
+		if err := m.Handler.Process(ctx, route, m.Emitter); err != nil {
 			m.logError(err)
 			continue
 		}

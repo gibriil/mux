@@ -98,15 +98,15 @@ Set up your mux and attach Handlers to routes
 
 	mux := mux.NewMux()
 
-	mux.Handlefunc("Route 1", func(r Routable) error {
+	mux.Handlefunc("Route 1", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 
-	mux.Handlefunc("Route 2", func(r Routable) error {
+	mux.Handlefunc("Route 2", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 
-	mux.Handlefunc("Route 3", func(r Routable) error {
+	mux.Handlefunc("Route 3", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 

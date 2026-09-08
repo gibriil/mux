@@ -4,15 +4,17 @@
 
 package mux
 
+import "context"
+
 // A Handler responds to a Routable.
 type Handler interface {
-	Process(Routable, Handler) error
+	Process(context.Context, Routable, Handler) error
 }
 
 // The HandlerFunc type is an adapter to allow the use of ordinary functions as Routable handlers. If f is a function with the appropriate signature, HandlerFunc(f) is a Handler that calls f.
-type HandlerFunc func(Routable, Handler) error
+type HandlerFunc func(context.Context, Routable, Handler) error
 
-// Process calls f(r, tx).
-func (f HandlerFunc) Process(r Routable, tx Handler) error {
-	return f(r, tx)
+// Process calls f(ctx, r, tx).
+func (f HandlerFunc) Process(ctx context.Context, r Routable, tx Handler) error {
+	return f(ctx, r, tx)
 }

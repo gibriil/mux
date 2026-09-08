@@ -5,6 +5,7 @@
 package mux_test
 
 import (
+	"context"
 	"errors"
 	"io"
 	"log"
@@ -26,7 +27,7 @@ func TestProcessorProcess(t *testing.T) {
 
 	var received []mux.Routable
 
-	handler := mux.HandlerFunc(func(r mux.Routable, tx mux.Handler) error {
+	handler := mux.HandlerFunc(func(ctx context.Context, r mux.Routable, tx mux.Handler) error {
 		received = append(received, r)
 		return nil
 	})
@@ -65,7 +66,7 @@ func TestProcessorContinuesAfterHandlerError(t *testing.T) {
 
 	var received []mux.Routable
 
-	handler := mux.HandlerFunc(func(r mux.Routable, tx mux.Handler) error {
+	handler := mux.HandlerFunc(func(ctx context.Context, r mux.Routable, tx mux.Handler) error {
 		received = append(received, r)
 
 		if r.Route() == "two" {

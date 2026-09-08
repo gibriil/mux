@@ -30,14 +30,14 @@ func (m *Mux) Handle(route Route, handler Handler) {
 }
 
 // HandleFunc registers the handler function for the given Route in Mux.
-func (m *Mux) HandleFunc(route Route, handler func(Routable, Handler) error) {
+func (m *Mux) HandleFunc(route Route, handler func(context.Context, Routable, Handler) error) {
 	m.register(route, HandlerFunc(handler))
 }
 
 // register registers a handler for a route.
 func (m *Mux) register(route Route, handler Handler) {
-	routeKey := resolveRoute(route)
-	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
+	routeKey, err := resolveRoute(route)
+	if errors.Is(err, ErrNoRoute) {
 		panic(err)
 	}
 
@@ -47,13 +47,13 @@ func (m *Mux) register(route Route, handler Handler) {
 	if _, exists := m.routes[routeKey]; exists {
 		panic("route already has a registered Handler")
 	}
-	m.routes[route] = handler
+	m.routes[routeKey] = handler
 }
 
 // Process resolves the route from Routable and executes the matching Handler
-func (m *Mux) Process(r Routable, tx Handler) error {
-	routeKey := resolveRoute(Route(r))
-	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
+func (m *Mux) Process(ctx context.Context, r Routable, tx Handler) error {
+	routeKey, err := resolveRoute(Route(r))
+	if errors.Is(err, ErrNoRoute) {
 		return err
 	}
 
@@ -65,28 +65,5 @@ func (m *Mux) Process(r Routable, tx Handler) error {
 		return ErrNoHandler
 	}
 
-	return h.Process(r, tx)
-}
-
-// Process resolves the route from Routable and executes the matching Handler with the provided context
-func (m *Mux) ProcessWithContext(ctx context.Context, r Routable, tx Handler) error {
-	routeKey := resolveRoute(Route(r))
-	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
-		return err
-	}
-
-	m.mu.RLock()
-	h, exists := m.routes[routeKey]
-	m.mu.RUnlock()
-
-	if !exists {
-		return ErrNoHandler
-	}
-
-	payload := routableWithContext{
-		Routable: r,
-		ctx:      ctx,
-	}
-
-	return h.Process(payload, tx)
+	return h.Process(ctx, r, tx)
 }

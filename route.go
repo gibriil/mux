@@ -28,29 +28,19 @@ type routableWithContext struct {
 }
 
 // resolveRoute loops through Routable's Route() until a comparable is found that does not satisfy Routable or until maxDepth is reached.
-func resolveRoute(r Route) Route {
+func resolveRoute(r Route) (Route, error) {
 	for depth := 0; depth < maxDepth; depth++ {
 		next, ok := r.(Routable)
 		if !ok {
-			return r
+			return r, nil
 		}
 
 		r = next.Route()
 	}
 
 	if _, ok := r.(Routable); ok {
-		return ErrNoRoute
+		return nil, ErrNoRoute
 	}
 
-	return r
-}
-
-func UnwrapContext(r Routable) context.Context {
-	rCxt, ok := r.(routableWithContext)
-
-	if !ok {
-		return context.Background()
-	}
-
-	return rCxt.ctx
+	return r, nil
 }
