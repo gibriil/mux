@@ -18,15 +18,9 @@ var (
 // A Processor defines parameters for running a multiplexer process
 type Processor struct {
 	Source   Source
-	Handler  Handler
+	Handler  Handler // Handles Routable from Source
+	Emitter  Handler // Processable Handler from within a Handler
 	ErrorLog *log.Logger
-}
-
-// NewMux creates a new Mux.
-func NewMux() *Mux {
-	return &Mux{
-		routes: map[Route]Handler{},
-	}
 }
 
 // Process reads from Source to begin handling routes
@@ -42,13 +36,19 @@ func (m *Processor) ProcessWithContext(ctx context.Context) error {
 			return err
 		}
 
-		if err := m.Handler.Process(route); err != nil {
+		payload := routableWithContext{
+			Routable: route,
+			ctx:      ctx,
+		}
+
+		if err := m.Handler.Process(payload, m.Emitter); err != nil {
 			m.logError(err)
 			continue
 		}
 	}
 }
 
+// logError logs errors to the processor's ErrorLog
 func (m *Processor) logError(err error) {
 	if m.ErrorLog != nil {
 		m.ErrorLog.Println(err)

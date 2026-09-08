@@ -5,6 +5,7 @@
 package mux
 
 import (
+	"context"
 	"errors"
 	"sync"
 )
@@ -16,13 +17,20 @@ type Mux struct {
 	routes map[Route]Handler
 }
 
+// NewMux creates a new Mux.
+func NewMux() *Mux {
+	return &Mux{
+		routes: map[Route]Handler{},
+	}
+}
+
 // Handle registers the handler for the given Route in Mux.
 func (m *Mux) Handle(route Route, handler Handler) {
 	m.register(route, handler)
 }
 
 // HandleFunc registers the handler function for the given Route in Mux.
-func (m *Mux) HandleFunc(route Route, handler func(Routable) error) {
+func (m *Mux) HandleFunc(route Route, handler func(Routable, Handler) error) {
 	m.register(route, HandlerFunc(handler))
 }
 
@@ -43,7 +51,7 @@ func (m *Mux) register(route Route, handler Handler) {
 }
 
 // Process resolves the route from Routable and executes the matching Handler
-func (m *Mux) Process(r Routable) error {
+func (m *Mux) Process(r Routable, tx Handler) error {
 	routeKey := resolveRoute(Route(r))
 	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
 		return err
@@ -57,5 +65,28 @@ func (m *Mux) Process(r Routable) error {
 		return ErrNoHandler
 	}
 
-	return h.Process(r)
+	return h.Process(r, tx)
+}
+
+// Process resolves the route from Routable and executes the matching Handler with the provided context
+func (m *Mux) ProcessWithContext(ctx context.Context, r Routable, tx Handler) error {
+	routeKey := resolveRoute(Route(r))
+	if err, bad := routeKey.(error); bad && errors.Is(err, ErrNoRoute) {
+		return err
+	}
+
+	m.mu.RLock()
+	h, exists := m.routes[routeKey]
+	m.mu.RUnlock()
+
+	if !exists {
+		return ErrNoHandler
+	}
+
+	payload := routableWithContext{
+		Routable: r,
+		ctx:      ctx,
+	}
+
+	return h.Process(payload, tx)
 }

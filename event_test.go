@@ -47,7 +47,7 @@ func TestMuxProcess(t *testing.T) {
 
 	var received mux.Routable
 
-	m.Handle("test", mux.HandlerFunc(func(r mux.Routable) error {
+	m.Handle("test", mux.HandlerFunc(func(r mux.Routable, tx mux.Handler) error {
 		received = r
 		return nil
 	}))
@@ -59,7 +59,7 @@ func TestMuxProcess(t *testing.T) {
 		},
 	}
 
-	if err := m.Process(e); err != nil {
+	if err := m.Process(e, nil); err != nil {
 		t.Fatalf("Process() error = %v", err)
 	}
 
@@ -73,7 +73,7 @@ func TestMuxProcessNoHandler(t *testing.T) {
 
 	err := m.Process(event{
 		Name: "missing",
-	})
+	}, nil)
 
 	if !errors.Is(err, mux.ErrNoHandler) {
 		t.Fatalf("Process() error = %v, want ErrNoHandler", err)
@@ -83,12 +83,12 @@ func TestMuxProcessNoHandler(t *testing.T) {
 func TestHandlerFunc(t *testing.T) {
 	called := false
 
-	handler := mux.HandlerFunc(func(r mux.Routable) error {
+	handler := mux.HandlerFunc(func(r mux.Routable, tx mux.Handler) error {
 		called = true
 		return nil
 	})
 
-	if err := handler.Process(event{}); err != nil {
+	if err := handler.Process(event{}, nil); err != nil {
 		t.Fatalf("Process() error = %v", err)
 	}
 
@@ -100,7 +100,7 @@ func TestHandlerFunc(t *testing.T) {
 func TestMuxHandleDuplicate(t *testing.T) {
 	m := mux.NewMux()
 
-	handler := mux.HandlerFunc(func(mux.Routable) error {
+	handler := mux.HandlerFunc(func(mux.Routable, mux.Handler) error {
 		return nil
 	})
 

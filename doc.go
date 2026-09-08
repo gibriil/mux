@@ -17,15 +17,15 @@ Start by setting up a new mux
 Register handlers for each route
 ```go
 
-	mux.Handlefunc("Route 1", func(r Routable) error {
+	mux.Handlefunc("Route 1", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 
-	mux.Handlefunc("Route 2", func(r Routable) error {
+	mux.Handlefunc("Route 2", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 
-	mux.Handlefunc("Route 3", func(r Routable) error {
+	mux.Handlefunc("Route 3", func(r mux.Routable, tx mux.Handler) error {
 		.......
 	})
 
@@ -50,8 +50,8 @@ Send a Routable through the processor
 
 	err := mux.Process(Event{
 		Name: "Rout 2",
-		Detail: "This is my test event"
-	})
+		Detail: "This is my test event",
+	}, nil)
 
 ```
 
@@ -116,7 +116,7 @@ Setup your processes and start the event loop
 ```go
 
 	p := &mux.Processor{
-		Source:   &eventBus{
+		Source: eventBus{
 			events: []mux.Routable{
 				Event{Name: "Route 1"},
 				Event{Name: "Route 2"},

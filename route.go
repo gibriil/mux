@@ -4,6 +4,8 @@
 
 package mux
 
+import "context"
+
 const maxDepth = 3
 
 // Route is a value used to identify a registered route.
@@ -17,6 +19,12 @@ type Route any
 // Route() must return a comparable before maxDepth
 type Routable interface {
 	Route() Route
+}
+
+// routableWithContext is an internal wrapper for a Routable to provide context to Handlers
+type routableWithContext struct {
+	Routable
+	ctx context.Context
 }
 
 // resolveRoute loops through Routable's Route() until a comparable is found that does not satisfy Routable or until maxDepth is reached.
@@ -35,4 +43,14 @@ func resolveRoute(r Route) Route {
 	}
 
 	return r
+}
+
+func UnwrapContext(r Routable) context.Context {
+	rCxt, ok := r.(routableWithContext)
+
+	if !ok {
+		return context.Background()
+	}
+
+	return rCxt.ctx
 }
